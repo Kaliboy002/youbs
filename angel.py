@@ -2,10 +2,10 @@ import os
 from pyrogram import Client, filters
 from pytube import YouTube
 
-# Load environment variables
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-API_ID = int(os.getenv("API_ID"))
-API_HASH = os.getenv("API_HASH")
+# Hardcoded variables instead of using .env
+BOT_TOKEN = "7591396387:AAHqh_ARascqC6EwQiGPMiBCGj96K6sxJwY"
+API_ID = 15787995
+API_HASH = "e51a3154d2e0c45e5ed70251d68382de"
 
 # Initialize Pyrogram Client
 app = Client("yt_downloader_bot", bot_token=BOT_TOKEN, api_id=API_ID, api_hash=API_HASH)
