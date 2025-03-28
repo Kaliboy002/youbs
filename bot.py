@@ -1,4 +1,5 @@
 import os
+import random
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 import yt_dlp
@@ -11,6 +12,13 @@ DOWNLOAD_FOLDER = "downloads"
 
 if not os.path.exists(DOWNLOAD_FOLDER):
     os.makedirs(DOWNLOAD_FOLDER)
+
+# List of user agents to rotate
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
+    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0",
+]
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -25,9 +33,11 @@ def download_video(url):
         'noplaylist': True,
         'merge_output_format': 'mp4',
         'max_filesize': 50_000_000,  # 50MB limit for Telegram
-        'quiet': True,  # Suppress some output
-        'no_warnings': True,  # Reduce warning clutter
-        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',  # Mimic a browser
+        'quiet': True,
+        'no_warnings': True,
+        'user_agent': random.choice(USER_AGENTS),  # Rotate user agents
+        'nocheckcertificate': True,  # Bypass SSL issues
+        'geo_bypass': True,  # Attempt to bypass geo-restrictions
     }
     
     try:
@@ -74,8 +84,8 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
         os.remove(filename)
     elif filename == "AUTH_REQUIRED":
         await status_msg.edit_text(
-            "This video requires authentication. I can’t download it without YouTube cookies.\n"
-            "Try a different video or use a service that doesn’t require login."
+            "This video requires authentication. I can’t download it without YouTube login credentials.\n"
+            "Try a different public video or check yt-dlp documentation for cookie setup."
         )
     else:
         await status_msg.edit_text(f"Error: {filename}")
