@@ -14,7 +14,8 @@ if not os.path.exists(DOWNLOAD_FOLDER):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Hi! Send me a YouTube URL and I'll download the video for you."
+        "Hi! Send me a YouTube URL and I'll try to download the video for you.\n"
+        "Note: Some videos may require authentication and might not work."
     )
 
 def download_video(url):
@@ -24,6 +25,9 @@ def download_video(url):
         'noplaylist': True,
         'merge_output_format': 'mp4',
         'max_filesize': 50_000_000,  # 50MB limit for Telegram
+        'quiet': True,  # Suppress some output
+        'no_warnings': True,  # Reduce warning clutter
+        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',  # Mimic a browser
     }
     
     try:
@@ -31,6 +35,11 @@ def download_video(url):
             info = ydl.extract_info(url, download=True)
             filename = ydl.prepare_filename(info)
             return filename
+    except yt_dlp.utils.DownloadError as e:
+        error_msg = str(e)
+        if "Sign in to confirm" in error_msg or "bot" in error_msg:
+            return "AUTH_REQUIRED"
+        return error_msg
     except Exception as e:
         return str(e)
 
@@ -63,6 +72,11 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Cleanup
         await status_msg.delete()
         os.remove(filename)
+    elif filename == "AUTH_REQUIRED":
+        await status_msg.edit_text(
+            "This video requires authentication. I can’t download it without YouTube cookies.\n"
+            "Try a different video or use a service that doesn’t require login."
+        )
     else:
         await status_msg.edit_text(f"Error: {filename}")
 
