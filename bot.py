@@ -70,7 +70,7 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Something went wrong. Please try again with a valid YouTube URL.")
 
 def main():
-    # Build application with token
+    # Create the Application instance directly
     application = Application.builder().token(TOKEN).build()
     
     # Add handlers
@@ -78,7 +78,8 @@ def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_url))
     application.add_error_handler(error)
     
-    # Run the bot
+    # Start polling
+    print("Bot is running...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
