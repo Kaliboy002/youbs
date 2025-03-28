@@ -1,3 +1,4 @@
+aiohttp
 pytube
 Pyrogram
 tgcrypto
